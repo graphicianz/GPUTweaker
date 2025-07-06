@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# PyCharm settings (optional, สำหรับ share repo ร่วมกับคนอื่น)
+.idea/
+
+# Build / release folders
+release/
+*.exe
+*.zip
