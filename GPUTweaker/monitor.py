@@ -46,6 +46,7 @@ def get_all_gpu_status():
             'power_usage': power_usage,
             'fan_speed': fan_speed,
             'graphics_clock': graphics_clock,
+            'core_clock': graphics_clock,  # ✅ alias เพิ่มตรงนี้
             'memory_clock': memory_clock,
         })
 

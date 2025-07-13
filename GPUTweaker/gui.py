@@ -1,41 +1,117 @@
-from PySide2.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton
-from GPUTweaker.monitor import get_all_gpu_status
-import sys
+from PySide2.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QSlider, QFrame,
+    QTabWidget, QHBoxLayout
+)
+from PySide2.QtCore import Qt
+from monitor import get_all_gpu_status
 
-def run_gui():
-    app = QApplication(sys.argv)
-    window = QWidget()
-    window.setWindowTitle("GPUTweaker")
 
-    layout = QVBoxLayout()
-    status_label = QLabel("Waiting for data...")
+class GPUTweakerGUI(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("GPUTweaker")
+        self.setMinimumWidth(400)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-    def refresh():
-        gpu_list = get_all_gpu_status()
-        if not gpu_list:
-            status_label.setText("No GPU detected.")
+        self.status_label = QLabel("GPU Status")
+        self.status_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.status_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.status_label.setWordWrap(True)
+        self.layout.addWidget(self.status_label)
+
+        # Sliders (Mock) — excluding Fan Speed
+        self.sliders = {}
+        slider_labels = [
+            "Core Clock Offset (Mock)",
+            "Memory Clock Offset (Mock)",
+            "Power Limit (Mock)",
+            "Core Voltage (Mock)",
+            "Temperature Limit (Mock)",
+        ]
+        for label in slider_labels:
+            self.add_slider(label)
+
+        # Fan Speed Tabs
+        self.add_fan_speed_tabs()
+
+        # Refresh button
+        self.refresh_button = QPushButton("Refresh")
+        self.refresh_button.clicked.connect(self.refresh_status)
+        self.layout.addWidget(self.refresh_button)
+
+        self.refresh_status()
+
+    def add_slider(self, label_text):
+        label = QLabel(label_text)
+        slider = QSlider(Qt.Horizontal)
+        slider.setMinimum(0)
+        slider.setMaximum(100)
+        slider.setValue(50)
+        value_label = QLabel("50%")
+
+        slider.valueChanged.connect(lambda val, lbl=value_label: lbl.setText(f"{val}%"))
+
+        self.layout.addWidget(label)
+        self.layout.addWidget(slider)
+        self.layout.addWidget(value_label)
+
+        self.sliders[label_text] = slider
+
+    def add_fan_speed_tabs(self):
+        tab_widget = QTabWidget()
+
+        # Manual tab
+        manual_tab = QWidget()
+        manual_layout = QVBoxLayout()
+        manual_tab.setLayout(manual_layout)
+
+        label = QLabel("Manual Fan Speed (%)")
+        slider = QSlider(Qt.Horizontal)
+        slider.setMinimum(0)
+        slider.setMaximum(100)
+        slider.setValue(50)
+        value_label = QLabel("50%")
+        slider.valueChanged.connect(lambda val: value_label.setText(f"{val}%"))
+
+        manual_layout.addWidget(label)
+        manual_layout.addWidget(slider)
+        manual_layout.addWidget(value_label)
+
+        # Fan Curve tab (Placeholder)
+        curve_tab = QWidget()
+        curve_layout = QVBoxLayout()
+        curve_tab.setLayout(curve_layout)
+        curve_layout.addWidget(QLabel("Fan Curve settings (coming soon...)"))
+
+        # Add tabs
+        tab_widget.addTab(manual_tab, "Manual")
+        tab_widget.addTab(curve_tab, "Fan Curve")
+        self.layout.addWidget(QLabel("Fan Speed"))
+        self.layout.addWidget(tab_widget)
+
+    def refresh_status(self):
+        gpu_status = get_all_gpu_status()
+        if not gpu_status:
+            self.status_label.setText("No GPU detected.")
             return
 
-        gpu = gpu_list[0]
-        output = (
-            f"GPU: {gpu['name']}\n"
-            f"Temperature: {gpu['temperature']} °C\n"
+        gpu = gpu_status[0]
+        text = (
+            f"Name: {gpu['name']}\n"
+            f"Temperature: {gpu['temperature']} ℃\n"
             f"GPU Usage: {gpu['gpu_usage']} %\n"
             f"VRAM Used: {gpu['vram_used_MB']} / {gpu['vram_total_MB']} MB\n"
             f"Core Clock: {gpu['graphics_clock']} MHz\n"
             f"Memory Clock: {gpu['memory_clock']} MHz\n"
             f"Power Usage: {gpu['power_usage']} W\n"
-            f"Fan Speed: {gpu['fan_speed']} %\n"
+            f"Fan Speed: {gpu['fan_speed']} %"
         )
-        status_label.setText(output)
+        self.status_label.setText(text)
 
-    refresh_btn = QPushButton("Refresh")
-    refresh_btn.clicked.connect(refresh)
 
-    layout.addWidget(status_label)
-    layout.addWidget(refresh_btn)
-    window.setLayout(layout)
+def run_gui():
+    app = QApplication([])
+    window = GPUTweakerGUI()
     window.show()
-
-    refresh()  # show data on startup
-    sys.exit(app.exec_())
+    app.exec_()
