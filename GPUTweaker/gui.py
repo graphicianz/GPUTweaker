@@ -39,13 +39,13 @@ class GPUTweakerGUI(QWidget):
         # Reset & Refresh buttons in one row (half–half width)
         button_layout = QHBoxLayout()
 
-        self.reset_button = QPushButton("Default")
-        self.reset_button.clicked.connect(self.reset_status)
-        button_layout.addWidget(self.reset_button, stretch=1)
+        self.default_button = QPushButton("Default")
+        self.default_button.clicked.connect(self.reset_status)
+        button_layout.addWidget(self.default_button, stretch=1)
 
-        self.refresh_button = QPushButton("Apply")
-        self.refresh_button.clicked.connect(self.refresh_status)
-        button_layout.addWidget(self.refresh_button, stretch=1)
+        self.apply_button = QPushButton("Apply")
+        self.apply_button.clicked.connect(self.refresh_status)
+        button_layout.addWidget(self.apply_button, stretch=1)
 
         self.layout.addLayout(button_layout)
 
