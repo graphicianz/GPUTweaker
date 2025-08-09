@@ -21,26 +21,36 @@ class GPUTweakerGUI(QWidget):
         self.layout.addWidget(self.status_label)
 
         # Sliders (Mock) — excluding Fan Speed
-        self.sliders = {}
+        self.sliders = {}  # {label: {"widget": QSlider, "default": int}}
         slider_labels = [
-            ["Clock Core (MHz)", [0,-500,1000]],
-            ["Clock Mem (MHz)",[0,-1000,2000]],
-            ["Voltage Core (mV)",[0, 0,100]],
-            ["Power Limit (%)",[100,46,140]],
-            ["Temperature Limit (C)",[70, 65, 90]],
-            ["Fan Speed Limit (%)", [30,0,100]]
+            ["Clock Core (MHz)", [0, -500, 1000]],
+            ["Clock Mem (MHz)", [0, -1000, 2000]],
+            ["Voltage Core (mV)", [0, 0, 100]],
+            ["Power Limit (%)", [100, 46, 140]],
+            ["Temperature Limit (C)", [70, 65, 90]],
+            ["Fan Speed Limit (%)", [30, 0, 100]]
         ]
-        for data in slider_labels:
-            self.add_slider(data[0], data[1])
+        for label, values in slider_labels:
+            slider = self.add_slider(label, values)
+            self.sliders[label] = {"widget": slider, "default": values[0]}
 
         # Fan Speed Tabs
         self.add_fan_speed_tabs()
 
-        # Refresh button
-        self.refresh_button = QPushButton("Refresh")
-        self.refresh_button.clicked.connect(self.refresh_status)
-        self.layout.addWidget(self.refresh_button)
+        # Reset & Refresh buttons in one row (half–half width)
+        button_layout = QHBoxLayout()
 
+        self.reset_button = QPushButton("Default")
+        self.reset_button.clicked.connect(self.reset_status)
+        button_layout.addWidget(self.reset_button, stretch=1)
+
+        self.refresh_button = QPushButton("Apply")
+        self.refresh_button.clicked.connect(self.refresh_status)
+        button_layout.addWidget(self.refresh_button, stretch=1)
+
+        self.layout.addLayout(button_layout)
+
+        # Initial refresh
         self.refresh_status()
 
     def add_slider(self, label_text, values):
@@ -49,15 +59,18 @@ class GPUTweakerGUI(QWidget):
         slider.setMinimum(values[1])
         slider.setMaximum(values[2])
         slider.setValue(values[0])
-        value_label = QLabel( f"{ ('+' if values[0] > 0 else '') +str(values[0])}")
 
-        slider.valueChanged.connect(lambda val, lbl=value_label: lbl.setText(f"{ ('+' if val > 0 else '') +str(val)}"))
+        value_label = QLabel(f"{('+' if values[0] > 0 else '')}{values[0]}")
+
+        slider.valueChanged.connect(
+            lambda val, lbl=value_label: lbl.setText(f"{('+' if val > 0 else '')}{val}")
+        )
 
         self.layout.addWidget(label)
         self.layout.addWidget(slider)
         self.layout.addWidget(value_label)
 
-        self.sliders[label_text] = slider
+        return slider
 
     def add_fan_speed_tabs(self):
         tab_widget = QTabWidget()
@@ -79,17 +92,17 @@ class GPUTweakerGUI(QWidget):
         manual_layout.addWidget(slider)
         manual_layout.addWidget(value_label)
 
-        # Fan Curve tab (Placeholder)
-        # curve_tab = QWidget()
-        # curve_layout = QVBoxLayout()
-        # curve_tab.setLayout(curve_layout)
-        # curve_layout.addWidget(QLabel("Fan Curve settings (coming soon...)"))
-        #
-        # # Add tabs
+        # ถ้าจะเปิดใช้ Fan Curve ในอนาคต ค่อยเพิ่มแท็บใหม่ได้
         # tab_widget.addTab(manual_tab, "Manual")
-        # tab_widget.addTab(curve_tab, "Fan Curve")
         # self.layout.addWidget(QLabel("Fan Speed"))
         # self.layout.addWidget(tab_widget)
+
+    def reset_status(self):
+        # รีเซ็ตทุกสไลเดอร์กลับค่า default ที่กำหนดใน slider_labels
+        for data in self.sliders.values():
+            slider_widget = data["widget"]
+            default_value = data["default"]
+            slider_widget.setValue(default_value)
 
     def refresh_status(self):
         gpu_status = get_all_gpu_status()
