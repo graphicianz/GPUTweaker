@@ -25,7 +25,8 @@ class GPUTweakerGUI(QWidget):
         slider_labels = [
             ["Clock Core (MHz)", [0,-500,1000]],
             ["Clock Mem (MHz)",[0,-1000,2000]],
-            ["Voltage Core (mV)",[750, 700,1250]],
+            ["Voltage Core (mV)",[0, 0,100]],
+            ["Power Limit (%)",[100,46,140]],
             ["Temperature Limit (C)",[70, 65, 90]],
             ["Fan Speed Limit (%)", [30,0,100]]
         ]
