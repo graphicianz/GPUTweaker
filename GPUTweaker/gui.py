@@ -20,7 +20,6 @@ class GPUTweakerGUI(QWidget):
         self.status_label.setWordWrap(True)
         self.layout.addWidget(self.status_label)
 
-        # Sliders (Mock) — excluding Fan Speed
         self.sliders = {}  # {label: {"widget": QSlider, "default": int}}
         slider_labels = [
             ["Clock Core (MHz)", [0, -500, 1000]],
