@@ -23,14 +23,14 @@ class GPUTweakerGUI(QWidget):
         # Sliders (Mock) — excluding Fan Speed
         self.sliders = {}
         slider_labels = [
-            "Core Clock Offset (Mock)",
-            "Memory Clock Offset (Mock)",
-            "Power Limit (Mock)",
-            "Core Voltage (Mock)",
-            "Temperature Limit (Mock)",
+            ["Clock Core (MHz)", [0,-500,1000]],
+            ["Clock Mem (MHz)",[0,-1000,2000]],
+            ["Voltage Core (mV)",[750, 700,1250]],
+            ["Temperature Limit (C)",[70, 65, 90]],
+            ["Fan Speed Limit (%)", [30,0,100]]
         ]
-        for label in slider_labels:
-            self.add_slider(label)
+        for data in slider_labels:
+            self.add_slider(data[0], data[1])
 
         # Fan Speed Tabs
         self.add_fan_speed_tabs()
@@ -42,15 +42,15 @@ class GPUTweakerGUI(QWidget):
 
         self.refresh_status()
 
-    def add_slider(self, label_text):
+    def add_slider(self, label_text, values):
         label = QLabel(label_text)
         slider = QSlider(Qt.Horizontal)
-        slider.setMinimum(0)
-        slider.setMaximum(100)
-        slider.setValue(50)
-        value_label = QLabel("50%")
+        slider.setMinimum(values[1])
+        slider.setMaximum(values[2])
+        slider.setValue(values[0])
+        value_label = QLabel( f"{ ('+' if values[0] > 0 else '') +str(values[0])}")
 
-        slider.valueChanged.connect(lambda val, lbl=value_label: lbl.setText(f"{val}%"))
+        slider.valueChanged.connect(lambda val, lbl=value_label: lbl.setText(f"{ ('+' if val > 0 else '') +str(val)}"))
 
         self.layout.addWidget(label)
         self.layout.addWidget(slider)
@@ -79,16 +79,16 @@ class GPUTweakerGUI(QWidget):
         manual_layout.addWidget(value_label)
 
         # Fan Curve tab (Placeholder)
-        curve_tab = QWidget()
-        curve_layout = QVBoxLayout()
-        curve_tab.setLayout(curve_layout)
-        curve_layout.addWidget(QLabel("Fan Curve settings (coming soon...)"))
-
-        # Add tabs
-        tab_widget.addTab(manual_tab, "Manual")
-        tab_widget.addTab(curve_tab, "Fan Curve")
-        self.layout.addWidget(QLabel("Fan Speed"))
-        self.layout.addWidget(tab_widget)
+        # curve_tab = QWidget()
+        # curve_layout = QVBoxLayout()
+        # curve_tab.setLayout(curve_layout)
+        # curve_layout.addWidget(QLabel("Fan Curve settings (coming soon...)"))
+        #
+        # # Add tabs
+        # tab_widget.addTab(manual_tab, "Manual")
+        # tab_widget.addTab(curve_tab, "Fan Curve")
+        # self.layout.addWidget(QLabel("Fan Speed"))
+        # self.layout.addWidget(tab_widget)
 
     def refresh_status(self):
         gpu_status = get_all_gpu_status()
