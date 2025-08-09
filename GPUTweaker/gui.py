@@ -3,7 +3,7 @@ from PySide2.QtWidgets import (
     QTabWidget, QHBoxLayout
 )
 from PySide2.QtCore import Qt
-from monitor import get_all_gpu_status
+from .monitor import get_all_gpu_status
 
 
 class GPUTweakerGUI(QWidget):
