@@ -9,7 +9,7 @@ from monitor import get_all_gpu_status
 class GPUTweakerGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GPUTweaker")
+        self.setWindowTitle("SOC")
         self.setMinimumWidth(400)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
